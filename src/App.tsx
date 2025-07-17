@@ -5,10 +5,11 @@ import FloatingTexts from "./components/FloatingTexts";
 const App: React.FC = () => {
   const [textOpacity, setTextOpacity] = useState<number>(1);
   const [imagesOpacity, setImagesOpacity] = useState<[number, number]>([0, 0]);
-  const [isMuted, setIsMuted] = useState<boolean>(true); // State to manage mute status
+  const [isMuted, setIsMuted] = useState<boolean>(true); // Começa mutado
+  const [showUnmuteButton, setShowUnmuteButton] = useState<boolean>(true); // Controla a visibilidade do botão
 
-  const videoRef1 = useRef<HTMLVideoElement>(null); // Ref for the first video
-  const videoRef2 = useRef<HTMLVideoElement>(null); // Ref for the second video
+  const videoRef1 = useRef<HTMLVideoElement>(null);
+  const videoRef2 = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,30 +30,65 @@ const App: React.FC = () => {
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
 
-    // Ensure videos start muted if autoplay works
-    if (videoRef1.current) videoRef1.current.muted = isMuted;
-    if (videoRef2.current) videoRef2.current.muted = isMuted;
-
+    // Garante que os vídeos comecem mutados
+    if (videoRef1.current) {
+      videoRef1.current.muted = isMuted;
+      console.log("Inicialização: Video 1 mutado?", videoRef1.current.muted);
+    }
+    if (videoRef2.current) {
+      videoRef2.current.muted = isMuted;
+      console.log("Inicialização: Video 2 mutado?", videoRef2.current.muted);
+    }
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isMuted]); // Re-run effect if isMuted changes to apply it
+  }, [isMuted]); // Re-executa se isMuted mudar, para aplicar a propriedade
 
   const toggleMute = () => {
-    setIsMuted(prevMuted => !prevMuted);
-    // Manually toggle mute on the video elements
-    if (videoRef1.current) videoRef1.current.muted = !isMuted;
-    if (videoRef2.current) videoRef2.current.muted = !isMuted;
+    console.log("Botão de ativar som clicado. isMuted atual:", isMuted);
+    // Só tenta desmutar se estiver mutado e o botão estiver visível
+    if (isMuted) {
+      setIsMuted(false); // Define como desmutado
+      setShowUnmuteButton(false); // Esconde o botão após o clique
+
+      if (videoRef1.current) {
+        videoRef1.current.muted = false; // Desmuta o vídeo
+        console.log("Video 1: tentando desmutar. Novo status muted:", videoRef1.current.muted);
+        // Tenta dar play explicitamente após desmutar
+        videoRef1.current.play()
+          .then(() => {
+            console.log("Video 1: Play() bem-sucedido.");
+          })
+          .catch(error => {
+            console.error("Video 1: Erro ao tentar tocar (play()) após desmutar:", error);
+            // Isso geralmente indica que o navegador bloqueou.
+            // A mensagem de erro aqui é CRUCIAL para entender o porquê.
+          });
+      }
+      if (videoRef2.current) {
+        videoRef2.current.muted = false; // Desmuta o vídeo
+        console.log("Video 2: tentando desmutar. Novo status muted:", videoRef2.current.muted);
+        videoRef2.current.play()
+          .then(() => {
+            console.log("Video 2: Play() bem-sucedido.");
+          })
+          .catch(error => {
+            console.error("Video 2: Erro ao tentar tocar (play()) após desmutar:", error);
+          });
+      }
+    } else {
+        console.log("Vídeo já está desmutado ou botão não deveria estar visível.");
+    }
   };
 
   return (
     <main className="w-full min-h-[320vh] bg-black text-white relative overflow-hidden">
       {/* Background Videos */}
       <video
-        ref={videoRef1} // Assign ref
+        ref={videoRef1}
         autoPlay
         loop
         playsInline
-        muted={isMuted} // Control muted state
+        muted={isMuted} // Controlado pelo estado isMuted
         preload="auto"
         className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-60"
         src="asda1290381chdfeu.mp4"
@@ -60,11 +96,11 @@ const App: React.FC = () => {
         Your browser does not support the video tag.
       </video>
       <video
-        ref={videoRef2} // Assign ref
+        ref={videoRef2}
         autoPlay
         loop
         playsInline
-        muted={isMuted} // Control muted state
+        muted={isMuted} // Controlado pelo estado isMuted
         preload="auto"
         className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-20"
         style={{ animation: 'videoFadeInLoop 20s infinite alternate' }}
@@ -73,14 +109,24 @@ const App: React.FC = () => {
         Your browser does not support the video tag.
       </video>
 
-      {/* Unmute Button */}
-      <button
-        onClick={toggleMute}
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full z-50 text-sm opacity-80 hover:opacity-100 transition-opacity"
-      >
-        {isMuted ? 'Ativar Som' : 'Desativar Som'}
-      </button>
-
+      {/* Botão de Unmute Flutuante (mostrado apenas se estiver mutado e showUnmuteButton for true) */}
+      {isMuted && showUnmuteButton && (
+        <button
+          onClick={toggleMute}
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50
+                     bg-red-600 text-white font-bold text-lg px-6 py-3 rounded-full
+                     shadow-lg hover:bg-red-700 transition-all duration-300
+                     flex items-center gap-2 animate-bounce cursor-pointer
+                     focus:outline-none focus:ring-4 focus:ring-red-300"
+          aria-label="Ativar som do vídeo"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464A5 5 0 0117 12h-2m-4.596 0a5 5 0 01-9-3h2m9 3a5 5 0 01-9 3h2m-4.596 0A5 5 0 0117 12h-2m-4.596 0v0a5 5 0 01-9 3h2" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+          </svg>
+          Ver efeitos na imagem
+        </button>
+      )}
 
       <p className="fixed top-2 left-1/2 -translate-x-1/2 text-center text-xs font-bold italic text-gray-500 z-50">
         Feito com muito amor pelo seu bejador de homi preferido🤍
