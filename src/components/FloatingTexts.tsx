@@ -41,7 +41,8 @@ const FloatingTexts: React.FC = () => {
       {positions.map((item) => (
         <h5
           key={item.id}
-          className="absolute opacity-0 group-hover:opacity-100 transition-all duration-1000 ease-in-out text-white whitespace-nowrap text-xs sm:text-sm" // Adjusted font size
+          // Removed opacity-0 and group-hover:opacity-100
+          className="absolute transition-all duration-1000 ease-in-out text-white whitespace-nowrap text-xs sm:text-sm opacity-100" // Added opacity-100 to always be visible
           style={{
             top: item.top,
             left: item.left,
