@@ -34,8 +34,7 @@ const App: React.FC = () => {
       <video
         autoPlay
         loop
-        playsInline // Essential for autoplay on mobile devices
-        muted // Added muted attribute
+        playsInline
         preload="auto" // Added preload attribute
         className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-60" // Adjust opacity as needed
         src="asda1290381chdfeu.mp4" // Path to your first video file
@@ -45,8 +44,7 @@ const App: React.FC = () => {
       <video
         autoPlay
         loop
-        playsInline // Essential for autoplay on mobile devices
-        muted // Added muted attribute
+        playsInline
         preload="auto" // Added preload attribute
         className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-20" // Adjust opacity as needed
         style={{ animation: 'videoFadeInLoop 20s infinite alternate' }} // Optional: add an animation to cycle opacity
